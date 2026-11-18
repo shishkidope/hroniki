@@ -13,7 +13,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-y:scroll;overf
 *{box-sizing:border-box}
 body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--text);font:16px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 .wrap{max-width:840px;margin:0 auto;padding:20px 16px 60px;overflow-x:clip}
-h1{font-size:28px;margin:8px 0 14px;letter-spacing:.5px;text-align:center}
+h1{font-size:28px;margin:8px 0 14px;letter-spacing:.5px;text-align:center;color:var(--hc,var(--text))}
 nav{display:grid;gap:6px;margin-bottom:14px}
 .n2{display:flex;gap:6px}
 .n1 button{width:100%}
@@ -25,7 +25,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
 .tools input,.tools select,.dl input:not([type=color]):not([type=file]),.dl select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);width:100%}
 .tools input{flex:1 1 200px;width:auto}.tools select{width:auto}
-.sec{margin:26px 0 10px;padding:4px 10px;border-radius:8px;background:#06080d;border:1px solid var(--line);color:#c8d3ff;text-align:center;font-weight:800;font-size:clamp(15px,5.2vw,26px);line-height:1.25;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer}
+.sec{margin:26px 0 10px;padding:4px 10px;border-radius:8px;background:var(--sec,#06080d);border:1px solid var(--line);color:var(--secfg,#c8d3ff);text-align:center;font-weight:800;font-size:clamp(15px,5.2vw,26px);line-height:1.25;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer}
 
 .card{position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
 .edit{position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;line-height:1;z-index:2}
@@ -57,6 +57,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .none{color:var(--muted);font-size:14px;flex:none}
 .note{margin-top:10px;font-size:15px;border-left:3px solid var(--accent);padding-left:10px;white-space:pre-line}
 .note a{color:var(--accent);word-break:break-all}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}.crow input[type=color]{width:54px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.dl h3{margin:8px 0 0;font-size:16px}
 @media (min-width:700px){html{zoom:1.25}}
 .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-start;margin-top:6px}.row .event{margin-top:0;flex:0 0 230px;max-width:100%}@media (max-width:640px){.row .event:empty{display:none}}.row .note{margin-top:0;flex:1 1 150px;min-width:0}
 .mon{margin:22px 0 10px;padding:6px 12px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-weight:700;text-transform:capitalize}
@@ -86,9 +87,10 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
 <input id="q" type="search" placeholder="Поиск" aria-label="Поиск">
 <select id="sort" aria-label="Сортировка"><option value="new">Сначала новые</option><option value="old">Сначала старые</option><option value="hi">Оценка: высокая</option><option value="lo">Оценка: низкая</option></select>
 <select id="year" aria-label="Год"></select>
-<button class="chip pri" id="add" hidden>+ Добавить</button>
+<button class="chip pri" id="add" hidden>+ Добавить</button><button class="chip" id="cfg" hidden>⚙ Настройки</button>
 </div>
 <div id="feed"></div>
+<div class="ov" id="ov2" hidden><div class="dl" role="dialog" aria-label="Настройки"><h3>Виджет</h3><div id="pvw" style="background:#0b0e14;border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative"><iframe id="pv" title="Превью виджета" style="border:0;transform-origin:0 0;position:absolute;left:0;top:0"></iframe></div><div class="crow"><span>Размер источника в OBS (для превью)</span><span><input id="s_pw" type="number" min="200" max="3000" value="560" style="width:70px"> × <input id="s_ph" type="number" min="200" max="3000" value="700" style="width:70px"></span></div><div class="crow"><span>Ширина виджета, px</span><input id="s_w" type="number" min="300" max="1400" style="width:90px"></div><div id="s_wc"></div><h3>Сайт</h3><div id="s_sc"></div><div class="btns"><button class="chip pri" id="s_save">Сохранить</button><button class="chip" id="s_reset">Сбросить всё</button><button class="chip" id="s_cancel">Отмена</button></div></div></div>
 <div id="toast" style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);max-width:90%;padding:8px 14px;border-radius:8px;background:var(--text);color:var(--bg);font-size:14px;z-index:30" hidden></div>
 
 </div>
@@ -229,6 +231,26 @@ if(admin){if(confirm("Выйти из режима редактирования?
 var t=prompt("Токен GitHub:");if(!t)return;t=t.trim();
 fetch("https://api.github.com/repos/"+REPO,{headers:{Authorization:"Bearer "+t}}).then(function(r){if(!r.ok)throw 0;try{localStorage.setItem("hr_token",t)}catch(e){}location.reload()}).catch(function(){alert("Токен не подошёл")})}
 document.querySelector("h1").addEventListener("click",function(){var n=Date.now();taps=n-tt<700?taps+1:1;tt=n;if(taps>=5){taps=0;login()}});
+function lum(h){var c=[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)});return(.299*c[0]+.587*c[1]+.114*c[2])/255}
+var SET={site:{},widget:{}},SET0="",DEF={bg:"#0b0e14",card:"#12161f",accent:"#9b7bff",sec:"#06080d"},CK=[["bg","Фон страницы"],["card","Фон карточек"],["accent","Акцент"],["sec","Плашки разделов"]];
+function applySite(c){var r=document.documentElement.style;["--bg","--card","--accent","--on-accent","--sec","--secfg","--text","--muted","--line","--hc"].forEach(function(p){r.removeProperty(p)});c=c||{};
+if(c.bg){r.setProperty("--bg",c.bg);r.setProperty("--hc",lum(c.bg)>.5?"#171b26":"#eef0f5")}
+if(c.card){var L=lum(c.card)>.5;r.setProperty("--card",c.card);r.setProperty("--text",L?"#171b26":"#eef0f5");r.setProperty("--muted",L?"#5d6780":"#8b93a7");r.setProperty("--line",L?"#d9deea":"#232838")}
+if(c.accent){r.setProperty("--accent",c.accent);r.setProperty("--on-accent",lum(c.accent)>.55?"#12101c":"#fff")}
+if(c.sec){r.setProperty("--sec",c.sec);r.setProperty("--secfg",lum(c.sec)>.5?"#171b26":"#c8d3ff")}}
+function loadSet(){var p=admin?fetch("https://api.github.com/repos/"+REPO+"/contents/settings.json?ref=main",{cache:"no-store",headers:{Authorization:"Bearer "+TOKEN,Accept:"application/vnd.github.raw+json"}}).then(function(r){if(!r.ok)throw 0;return r.json()}):Promise.reject();
+p.catch(function(){return fetch("settings.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})}).then(function(s){SET={site:s.site||{},widget:s.widget||{}};applySite(SET.site)}).catch(function(){})}
+loadSet();el("cfg").hidden=!admin;
+function crow(box,g){box.innerHTML=CK.filter(function(k){return g=="site"||k[0]!="bg"}).map(function(k){return '<div class="crow"><span>'+k[1]+'</span><span><input type="color" data-g="'+g+'" data-k="'+k[0]+'" value="'+(SET[g][k[0]]||DEF[k[0]])+'"> <button type="button" class="chip" data-g="'+g+'" data-k="'+k[0]+'" title="По умолчанию">↺</button></span></div>'}).join("")}
+function pvSend(){var w=el("pv").contentWindow;if(w)w.postMessage({hrSettings:SET.widget},"*")}
+function pvUpdate(){var f=el("pv"),w=+el("s_pw").value||560,h=+el("s_ph").value||700,b=el("pvw"),k=Math.min(1,b.clientWidth/w);f.style.width=w+"px";f.style.height=h+"px";f.style.transform="scale("+k+")";b.style.height=Math.round(h*k)+"px";pvSend()}
+function chg(g){if(g=="site")applySite(SET.site);else pvSend()}
+el("cfg").onclick=function(){SET0=JSON.stringify(SET);crow(el("s_wc"),"widget");crow(el("s_sc"),"site");el("s_w").value=SET.widget.width||560;el("ov2").hidden=false;el("pv").onload=pvSend;el("pv").src="widget.html?t="+Date.now();pvUpdate()};
+el("ov2").addEventListener("input",function(e){var t=e.target;if(t.type=="color"){SET[t.dataset.g][t.dataset.k]=t.value;chg(t.dataset.g)}else if(t.id=="s_w"){SET.widget.width=+t.value||undefined;pvSend()}else if(t.id=="s_pw"||t.id=="s_ph")pvUpdate()});
+el("ov2").addEventListener("click",function(e){var b=e.target.closest("button[data-k]");if(!b)return;var g=b.dataset.g;delete SET[g][b.dataset.k];crow(el(g=="site"?"s_sc":"s_wc"),g);chg(g)});
+el("s_reset").onclick=function(){SET={site:{},widget:{}};crow(el("s_wc"),"widget");crow(el("s_sc"),"site");el("s_w").value=560;applySite({});pvSend()};
+el("s_cancel").onclick=function(){SET=JSON.parse(SET0);applySite(SET.site);el("ov2").hidden=true};
+el("s_save").onclick=async function(){toast("Сохраняю настройки…");try{var sha;try{sha=(await gh("GET","contents/settings.json?ref=main")).sha}catch(e){if(e.message!="Not Found")throw e}var b={message:"Настройки с сайта",content:b64(JSON.stringify(SET)),branch:"main"};if(sha)b.sha=sha;await gh("PUT","contents/settings.json",b);toast("Настройки сохранены ✓ Виджет обновится примерно через минуту",4000);el("ov2").hidden=true}catch(e){toast("Не сохранилось: "+e.message,9000)}};
 function pub(){return fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})}
 (admin?fetch("https://api.github.com/repos/"+REPO+"/contents/data.json?ref=main",{cache:"no-store",headers:{Authorization:"Bearer "+TOKEN,Accept:"application/vnd.github.raw+json"}}).then(function(r){if(!r.ok)throw 0;return r.json()}).catch(pub):pub()).then(function(d){init(d,true)}).catch(function(){init(DEMO,false)});
 </script>
