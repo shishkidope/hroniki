@@ -136,11 +136,13 @@ function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+
 function txt(h){return(h||"").replace(/<[^>]*>/g," ")}
 function cmp(a,b){return a.l<b.l?1:a.l>b.l?-1:b.ts-a.ts}
 function ord(a){return a.slice().sort(cmp)}
+function fc(h,dk){if(!h||h.indexOf("color:#")<0)return h;return h.replace(/color:#([0-9a-f]{6})/gi,function(m,x){var c=[0,2,4].map(function(i){return parseInt(x.substr(i,2),16)}),l=(.299*c[0]+.587*c[1]+.114*c[2])/255,t=dk?(l<.6?(.6-l)/(1-l):0):(l>.5?(l-.5)/l:0);c=c.map(function(v){return Math.round(dk?v+(255-v)*t:v*(1-t))});return"color:#"+c.map(function(v){return("0"+v.toString(16)).slice(-2)}).join("")})}
+function dk(){var t=document.documentElement.dataset.theme;return t?t=="dark":matchMedia("(prefers-color-scheme: dark)").matches}
 function card(x){
 var rate=x.drop?'<span class="drop">дроп</span>':x.r==null?'<span class="none">без оценки</span>':'<span class="rate" style="--rc:var(--'+(x.r>=8?'good':x.r>=5?'ok':'bad')+')">'+x.r+'<small>/10</small></span>';
 var F=fmt;var d=x.ds.map(F).join('<br>');
 var box='<div class="cv" style="--c1:'+x.c[0]+';--c2:'+x.c[1]+'"><div class="box"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk"></div><div class="f rt"></div></div></div></div>';
-return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div>'+rate+'</div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+(x.ev||'')+'</div>'+(x.n?'<div class="note">'+x.n+'</div>':'')+'</div>':'')+'</div></article>'}
+return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div>'+rate+'</div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+fc(x.ev||'',dk())+'</div>'+(x.n?'<div class="note">'+fc(x.n,dk())+'</div>':'')+'</div>':'')+'</div></article>'}
 function render(){
 var nav=el("nav");var nb=function(t){return '<button role="tab" aria-selected="'+(t[0]==tab)+'" data-t="'+t[0]+'">'+t[1]+'</button>'};nav.innerHTML='<div class="n1">'+nb(TABS[0])+'</div><div class="n2">'+TABS.slice(1).map(nb).join("")+'</div>';
 nav.querySelectorAll("button").forEach(function(b){b.onclick=function(){location.hash=b.dataset.t}});
