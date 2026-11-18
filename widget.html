@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Хроники: виджет</title>
 <style>
-:root{--card:#12161f;--text:#eef0f5;--muted:#8b93a7;--line:#232838;--accent:#9b7bff;--good:#4ade80;--ok:#fbbf24;--bad:#ff6b6b;--event:#4ade80;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:dark;--card:#12161f;--text:#eef0f5;--muted:#8b93a7;--line:#232838;--accent:#9b7bff;--good:#4ade80;--ok:#fbbf24;--bad:#ff6b6b;--event:#4ade80;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:transparent}
 body{color:var(--text);font:16px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
@@ -32,12 +32,13 @@ body{color:var(--text);font:16px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,s
 .drop{padding:4px 12px;border-radius:8px;border:2px solid var(--bad);color:var(--bad);font-weight:800;font-size:24px;flex:none}
 .none{color:var(--muted);font-size:14px;flex:none}
 .note{margin-top:8px;font-size:15px;line-height:21px;overflow:hidden;border-left:3px solid var(--accent);padding-left:10px;white-space:pre-line}
+.cv{perspective:none}.b{transform:none;transform-style:flat}.fr{transform:none;box-shadow:none;border-radius:6px}.fr.im{background:none}.fr::after,.sp,.bk,.rt{display:none}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <script>
-var N={games:2,movies:1,anime:1},POLL=90000,got=false;
+var N={games:2,movies:1,anime:1},POLL=90000,got=false,PCT=1;
 function pic(w,h,c){return"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><rect width="100%" height="100%" fill="'+c+'"/><circle cx="'+w/2+'" cy="'+h/2+'" r="'+h/4+'" fill="rgba(255,255,255,.4)"/></svg>')}
 var DEMO={
 games:[{t:"Bioshock Remastered",ev:'макс, мин сложность <span style="color:var(--event)">gge3</span>',ds:["2026-11-10","2026-06-02"],r:3,c:["#1d4e5f","#0b1a24"]},
@@ -60,14 +61,14 @@ var rate=x.drop?'<span class="drop">дроп</span>':x.r==null?'<span class="non
 var box='<div class="cv" style="--c1:'+c[0]+';--c2:'+c[1]+'"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img src="'+esc(x.i)+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk"></div><div class="f rt"></div></div></div>';
 return '<div class="card">'+box+'<div><div class="top"><div><div class="date">'+F(last(x))+'</div><div class="title">'+esc(x.t)+'</div></div>'+rate+'</div>'+evh(fc(x.ev,true))+(x.n?'<div class="note">'+fc(x.n,true)+'</div>':'')+'</div></div>'}
 var T={games:"Игры",movies:"Фильмы | Сериалы | Мульты",anime:"Аниме"};
-function fit(){var a=document.getElementById("app");a.style.transform="none";clamp();var W=a.offsetWidth,H=a.offsetHeight,s=Math.min(innerWidth/W,innerHeight/H);a.style.transform="translateX("+(innerWidth-W*s)/2+"px) scale("+s+")"}
+function fit(){var a=document.getElementById("app");a.style.transform="none";clamp();var W=a.offsetWidth,H=a.offsetHeight,s=Math.min(innerWidth*PCT/W,innerHeight/H);a.style.transform="translateX("+(innerWidth-W*s)/2+"px) scale("+s+")"}
 function show(D){var h="";["games","movies","anime"].forEach(function(k){var L=newest(D[k]||[],N[k]);if(L.length)h+='<div class="sec">'+T[k]+'</div>'+L.map(card).join("")});document.getElementById("app").innerHTML=h;fit()}
 addEventListener("resize",fit);
 function load(){
 fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(D){got=true;show(D)}).catch(function(){if(!got)show(DEMO)})}
 function lum(h){var c=[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)});return(.299*c[0]+.587*c[1]+.114*c[2])/255}
 var fromParent=false;
-function applyW(s){s=s||{};var r=document.documentElement.style,a=document.getElementById("app");["--card","--accent","--sec","--secfg","--text","--muted","--line"].forEach(function(p){r.removeProperty(p)});a.style.width=(s.width||560)+"px";
+function applyW(s){s=s||{};var r=document.documentElement.style,a=document.getElementById("app");["--card","--accent","--sec","--secfg","--text","--muted","--line"].forEach(function(p){r.removeProperty(p)});a.style.width="";PCT=Math.min(1,Math.max(.3,(s.width&&s.width<=100?s.width:100)/100));
 if(s.card){var L=lum(s.card)>.5;r.setProperty("--card",s.card);r.setProperty("--text",L?"#171b26":"#eef0f5");r.setProperty("--muted",L?"#5d6780":"#8b93a7");r.setProperty("--line",L?"#d9deea":"#232838")}
 if(s.accent)r.setProperty("--accent",s.accent);
 if(s.sec){r.setProperty("--sec",s.sec);r.setProperty("--secfg",lum(s.sec)>.5?"#171b26":"#c8d3ff")}
