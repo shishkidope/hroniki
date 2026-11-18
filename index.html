@@ -58,7 +58,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .note{margin-top:10px;font-size:15px;border-left:3px solid var(--accent);padding-left:10px;white-space:pre-line}
 .note a{color:var(--accent);word-break:break-all}
 .crow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}.crow input[type=color]{width:54px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.dl h3{margin:8px 0 0;font-size:16px}
-@media (min-width:700px){html{zoom:1.25}}
+@media (min-width:700px){html{zoom:1.25}.dl{max-height:calc(92vh/1.25)}}
 .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-start;margin-top:6px}.row .event{margin-top:0;flex:0 0 230px;max-width:100%}@media (max-width:640px){.row .event:empty{display:none}}.row .note{margin-top:0;flex:1 1 150px;min-width:0}
 .mon{margin:22px 0 10px;padding:6px 12px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-weight:700;text-transform:capitalize}
 .yr{margin:30px 0 8px;padding:12px;border-radius:10px;background:var(--text);color:var(--bg);font-size:34px;font-weight:800;text-align:center}
@@ -243,7 +243,7 @@ p.catch(function(){return fetch("settings.json",{cache:"no-store"}).then(functio
 loadSet();el("cfg").hidden=!admin;
 function crow(box,g){box.innerHTML=CK.filter(function(k){return g=="site"||k[0]!="bg"}).map(function(k){return '<div class="crow"><span>'+k[1]+'</span><span><input type="color" data-g="'+g+'" data-k="'+k[0]+'" value="'+(SET[g][k[0]]||DEF[k[0]])+'"> <button type="button" class="chip" data-g="'+g+'" data-k="'+k[0]+'" title="По умолчанию">↺</button></span></div>'}).join("")}
 function pvSend(){var w=el("pv").contentWindow;if(w)w.postMessage({hrSettings:SET.widget},"*")}
-function pvUpdate(){var f=el("pv"),w=+el("s_pw").value||560,h=+el("s_ph").value||700,b=el("pvw"),k=Math.min(1,b.clientWidth/w);f.style.width=w+"px";f.style.height=h+"px";f.style.transform="scale("+k+")";b.style.height=Math.round(h*k)+"px";pvSend()}
+function pvUpdate(){var f=el("pv"),w=+el("s_pw").value||560,h=+el("s_ph").value||700,b=el("pvw"),z=innerWidth>=700?1.25:1,k=Math.min(1,b.clientWidth/w,innerHeight/z*.36/h);f.style.width=w+"px";f.style.height=h+"px";f.style.transform="scale("+k+")";f.style.left=Math.max(0,Math.round((b.clientWidth-w*k)/2))+"px";b.style.height=Math.round(h*k)+"px";pvSend()}
 function chg(g){if(g=="site")applySite(SET.site);else pvSend()}
 el("cfg").onclick=function(){SET0=JSON.stringify(SET);crow(el("s_wc"),"widget");crow(el("s_sc"),"site");el("s_w").value=SET.widget.width||560;el("ov2").hidden=false;el("pv").onload=pvSend;el("pv").src="widget.html?t="+Date.now();pvUpdate()};
 el("ov2").addEventListener("input",function(e){var t=e.target;if(t.type=="color"){SET[t.dataset.g][t.dataset.k]=t.value;chg(t.dataset.g)}else if(t.id=="s_w"){SET.widget.width=+t.value||undefined;pvSend()}else if(t.id=="s_pw"||t.id=="s_ph")pvUpdate()});
