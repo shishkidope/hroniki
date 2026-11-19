@@ -57,6 +57,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .none{color:var(--muted);font-size:14px;flex:none}
 .note{margin-top:10px;font-size:15px;border-left:3px solid var(--accent);padding-left:10px;white-space:pre-line}
 .note a{color:var(--accent);word-break:break-all}
+.bk{overflow:hidden;border-radius:4px 2px 2px 4px}.bk img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:brightness(.9)}
 #up{position:fixed;right:16px;bottom:20px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--accent);color:var(--on-accent);font-size:22px;line-height:1;cursor:pointer;z-index:15}
 .crow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}.crow input[type=color]{width:54px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.dl h3{margin:0;font-size:16px}.col{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-content:start;min-width:0}.dl.cfg{max-width:min(920px,100%);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}@media (max-width:800px){.dl.cfg{grid-template-columns:minmax(0,1fr)}}
 @media (min-width:700px){html{zoom:1.25}.dl{max-height:calc(92vh/1.25)}}
@@ -146,7 +147,7 @@ function dk(){var t=document.documentElement.dataset.theme;return t?t=="dark":ma
 function card(x){
 var rate=x.drop?'<span class="drop">дроп</span>':x.r==null?'<span class="none">без оценки</span>':'<span class="rate" style="--rc:var(--'+(x.r>=8?'good':x.r>=5?'ok':'bad')+')">'+x.r+'<small>/10</small></span>';
 var F=fmt;var d=x.ds.map(F).join('<br>');
-var box='<div class="cv" style="--c1:'+x.c[0]+';--c2:'+x.c[1]+'"><div class="box"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk"></div><div class="f rt"></div></div></div></div>';
+var box='<div class="cv" style="--c1:'+x.c[0]+';--c2:'+x.c[1]+'"><div class="box"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f rt"></div></div></div></div>';
 return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'" target="_blank" rel="noopener">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div>'+rate+'</div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+fc(x.ev||'',dk())+'</div>'+(x.n?'<div class="note">'+fc(x.n,dk())+'</div>':'')+'</div>':'')+'</div></article>'}
 function render(){
 var nav=el("nav");var nb=function(t){return '<button role="tab" aria-selected="'+(t[0]==tab)+'" data-t="'+t[0]+'">'+t[1]+'</button>'};nav.innerHTML='<div class="n1">'+nb(TABS[0])+'</div><div class="n2">'+TABS.slice(1).map(nb).join("")+'</div>';
