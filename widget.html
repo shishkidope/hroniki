@@ -61,7 +61,7 @@ var rate=x.drop?'<span class="drop">дроп</span>':x.r==null?'<span class="non
 var box='<div class="cv" style="--c1:'+c[0]+';--c2:'+c[1]+'"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img src="'+esc(x.i)+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk"></div><div class="f rt"></div></div></div>';
 return '<div class="card">'+box+'<div><div class="top"><div><div class="date">'+F(last(x))+'</div><div class="title">'+esc(x.t)+'</div></div>'+rate+'</div>'+evh(fc(x.ev,true))+(x.n?'<div class="note">'+fc(x.n,true)+'</div>':'')+'</div></div>'}
 var T={games:"Игры",movies:"Фильмы | Сериалы | Мульты",anime:"Аниме"};
-function fit(){var a=document.getElementById("app");a.style.transform="none";clamp();var W=a.offsetWidth,H=a.offsetHeight,s=Math.min(innerWidth*PCT/W,innerHeight/H);a.style.transform="translateX("+(innerWidth-W*s)/2+"px) scale("+s+")"}
+function fit(){var a=document.getElementById("app");a.style.transform="none";clamp();a.style.width="560px";clamp();var H=a.offsetHeight,vw=innerWidth,s=innerHeight/H,W=vw*PCT/s;if(W<420){W=420;s=vw*PCT/420}W=Math.min(W,1600);a.style.width=W+"px";clamp();a.style.transform="translateX("+(vw-W*s)/2+"px) scale("+s+")"}
 function show(D){var h="";["games","movies","anime"].forEach(function(k){var L=newest(D[k]||[],N[k]);if(L.length)h+='<div class="sec">'+T[k]+'</div>'+L.map(card).join("")});document.getElementById("app").innerHTML=h;fit()}
 addEventListener("resize",fit);
 function load(){

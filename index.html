@@ -27,8 +27,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .tools input{flex:1 1 200px;width:auto}.tools select{width:auto}
 .sec{margin:26px 0 10px;padding:4px 10px;border-radius:8px;background:var(--sec,#06080d);border:1px solid var(--line);color:var(--secfg,#c8d3ff);text-align:center;font-weight:800;font-size:clamp(15px,5.2vw,26px);line-height:1.25;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer}
 
-.card{position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
-.edit{position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;line-height:1;z-index:2}
+.card{content-visibility:auto;contain-intrinsic-size:auto 190px;position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.edit{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;line-height:1;z-index:2}
 .edit:hover{border-color:var(--accent);color:var(--accent)}
 .cv{--w:120px;--d:18px;position:relative;width:var(--w);height:calc(var(--w)*1.5)}
 .box{width:100%;height:100%;perspective:700px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
@@ -57,7 +57,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .none{color:var(--muted);font-size:14px;flex:none}
 .note{margin-top:10px;font-size:15px;border-left:3px solid var(--accent);padding-left:10px;white-space:pre-line}
 .note a{color:var(--accent);word-break:break-all}
-.crow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}.crow input[type=color]{width:54px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.dl h3{margin:8px 0 0;font-size:16px}
+#up{position:fixed;right:16px;bottom:20px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--accent);color:var(--on-accent);font-size:22px;line-height:1;cursor:pointer;z-index:15}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}.crow input[type=color]{width:54px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.dl h3{margin:0;font-size:16px}.col{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-content:start;min-width:0}.dl.cfg{max-width:min(920px,100%);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}@media (max-width:800px){.dl.cfg{grid-template-columns:minmax(0,1fr)}}
 @media (min-width:700px){html{zoom:1.25}.dl{max-height:calc(92vh/1.25)}}
 .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-start;margin-top:6px}.row .event{margin-top:0;flex:0 0 230px;max-width:100%}@media (max-width:640px){.row .event:empty{display:none}}.row .note{margin-top:0;flex:1 1 150px;min-width:0}
 .mon{margin:22px 0 10px;padding:6px 12px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-weight:700;text-transform:capitalize}
@@ -84,13 +85,14 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
 <h1>ХРОНИКИ</h1>
 <nav id="nav" role="tablist"></nav>
 <div class="tools" id="tools">
-<input id="q" type="search" placeholder="Поиск" aria-label="Поиск">
+<input id="q" type="search" name="hr-search" placeholder="Поиск" aria-label="Поиск" autocomplete="off" autocorrect="off" spellcheck="false">
 <select id="sort" aria-label="Сортировка"><option value="new">Сначала новые</option><option value="old">Сначала старые</option><option value="hi">Оценка: высокая</option><option value="lo">Оценка: низкая</option></select>
 <select id="year" aria-label="Год"></select>
 <button class="chip pri" id="add" hidden>+ Добавить</button><button class="chip" id="cfg" hidden>⚙ Настройки</button>
 </div>
 <div id="feed"></div>
-<div class="ov" id="ov2" hidden><div class="dl" role="dialog" aria-label="Настройки"><h3>Виджет</h3><div id="pvw" style="background:#0b0e14;border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative"><iframe id="pv" title="Превью виджета" style="border:0;transform-origin:0 0;position:absolute;left:0;top:0"></iframe></div><div class="crow"><span>Размер источника в OBS (для превью)</span><span><input id="s_pw" type="number" min="200" max="3000" value="560" style="width:70px"> × <input id="s_ph" type="number" min="200" max="3000" value="700" style="width:70px"></span></div><div class="crow"><span>Ширина карточек, % от ширины источника</span><input id="s_w" type="number" min="30" max="100" style="width:90px"></div><div id="s_wc"></div><h3>Сайт</h3><div id="s_sc"></div><div class="btns"><button class="chip pri" id="s_save">Сохранить</button><button class="chip" id="s_reset">Сбросить всё</button><button class="chip" id="s_cancel">Отмена</button></div></div></div>
+<button id="up" aria-label="Наверх" hidden>↑</button>
+<div class="ov" id="ov2" hidden><div class="dl cfg" role="dialog" aria-label="Настройки"><div class="col"><h3>Виджет</h3><div id="pvw" style="background:#0b0e14;border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative"><iframe id="pv" title="Превью виджета" style="border:0;transform-origin:0 0;position:absolute;left:0;top:0"></iframe></div><div class="crow"><span>Размер источника в OBS (для превью)</span><span><input id="s_pw" type="number" min="200" max="3000" value="560" style="width:70px"> × <input id="s_ph" type="number" min="200" max="3000" value="700" style="width:70px"></span></div><div class="crow"><span>Ширина карточек, % от ширины источника</span><input id="s_w" type="number" min="30" max="100" style="width:90px"></div><div id="s_wc"></div></div><div class="col"><h3>Сайт</h3><div id="s_sc"></div><div class="btns"><button class="chip pri" id="s_save">Сохранить</button><button class="chip" id="s_reset">Сбросить всё</button><button class="chip" id="s_cancel">Отмена</button></div></div></div></div>
 <div id="toast" style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);max-width:90%;padding:8px 14px;border-radius:8px;background:var(--text);color:var(--bg);font-size:14px;z-index:30" hidden></div>
 
 </div>
@@ -145,7 +147,7 @@ function card(x){
 var rate=x.drop?'<span class="drop">дроп</span>':x.r==null?'<span class="none">без оценки</span>':'<span class="rate" style="--rc:var(--'+(x.r>=8?'good':x.r>=5?'ok':'bad')+')">'+x.r+'<small>/10</small></span>';
 var F=fmt;var d=x.ds.map(F).join('<br>');
 var box='<div class="cv" style="--c1:'+x.c[0]+';--c2:'+x.c[1]+'"><div class="box"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk"></div><div class="f rt"></div></div></div></div>';
-return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div>'+rate+'</div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+fc(x.ev||'',dk())+'</div>'+(x.n?'<div class="note">'+fc(x.n,dk())+'</div>':'')+'</div>':'')+'</div></article>'}
+return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'" target="_blank" rel="noopener">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div>'+rate+'</div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+fc(x.ev||'',dk())+'</div>'+(x.n?'<div class="note">'+fc(x.n,dk())+'</div>':'')+'</div>':'')+'</div></article>'}
 function render(){
 var nav=el("nav");var nb=function(t){return '<button role="tab" aria-selected="'+(t[0]==tab)+'" data-t="'+t[0]+'">'+t[1]+'</button>'};nav.innerHTML='<div class="n1">'+nb(TABS[0])+'</div><div class="n2">'+TABS.slice(1).map(nb).join("")+'</div>';
 nav.querySelectorAll("button").forEach(function(b){b.onclick=function(){location.hash=b.dataset.t}});
@@ -164,12 +166,12 @@ list.sort(function(a,b){return s=="new"?cmp(a,b):s=="old"?-cmp(a,b):s=="hi"?rv(b
 var h2="",last="",ly="";list.forEach(function(x){if(s=="new"||s=="old"){var yy=x.l.slice(0,4);if(yy!=ly){h2+='<div class="yr">'+(yy||"Без даты")+'</div>';ly=yy;last=""}var m=x.l.length>=7?MN[+x.l.slice(5,7)-1]:"";if(m&&m!=last){h2+='<div class="mon">'+m+'</div>';last=m}}h2+=card(x)});
 f.innerHTML=list.length?h2:'<div class="empty">Ничего не найдено</div>'}
 function route(){var h=location.hash.slice(1);tab=TABS.some(function(t){return t[0]==h})?h:"home";render()}
-["q","sort","year"].forEach(function(i){el(i).oninput=render});
+var dbt;["q","sort","year"].forEach(function(i){el(i).oninput=function(){clearTimeout(dbt);dbt=setTimeout(render,i=="q"?200:0)}});
 window.onhashchange=route;
 var drag=null,feed=el("feed");
-feed.addEventListener("pointerdown",function(e){var bx=e.target.closest(".box");if(!bx)return;bx.setPointerCapture(e.pointerId);drag={b:bx.firstChild,x:e.clientX};drag.b.classList.add("drag")});
-feed.addEventListener("pointermove",function(e){if(!drag)return;var r=Math.max(-75,Math.min(75,24+(e.clientX-drag.x)*.6));drag.b.style.setProperty("--ry",r+"deg");drag.b.style.setProperty("--sx",(50-(r-24)*.9)+"%")});
-function endDrag(){if(!drag)return;drag.b.classList.remove("drag");drag.b.style.removeProperty("--ry");drag.b.style.removeProperty("--sx");drag=null}
+feed.addEventListener("pointerdown",function(e){var bx=e.target.closest(".box");if(!bx)return;bx.setPointerCapture(e.pointerId);drag={b:bx.firstChild,x:e.clientX,a:parseFloat(bx.firstChild.style.getPropertyValue("--ry"))||24,r:null};drag.b.classList.add("drag")});
+feed.addEventListener("pointermove",function(e){if(!drag)return;var r=drag.a+(e.clientX-drag.x)*.8;drag.r=r;drag.b.style.setProperty("--ry",r+"deg");drag.b.style.setProperty("--sx",(50-Math.sin((r-24)*Math.PI/180)*60)+"%")});
+function endDrag(){if(!drag)return;var r0=drag.r==null?drag.a:drag.r;drag.b.classList.remove("drag");drag.b.style.setProperty("--ry",(24+360*Math.round((r0-24)/360))+"deg");drag.b.style.removeProperty("--sx");drag=null}
 feed.addEventListener("pointerup",endDrag);feed.addEventListener("pointercancel",endDrag);
 /* editor */
 var rs='<option value="">Без оценки</option><option value="d">Дроп</option>';for(var i=10;i>=0;i--)rs+='<option value="'+i+'">'+i+'</option>';el("e_r").innerHTML=rs;
@@ -243,7 +245,7 @@ p.catch(function(){return fetch("settings.json",{cache:"no-store"}).then(functio
 loadSet();el("cfg").hidden=!admin;
 function crow(box,g){box.innerHTML=CK.filter(function(k){return g=="site"||k[0]!="bg"}).map(function(k){return '<div class="crow"><span>'+k[1]+'</span><span><input type="color" data-g="'+g+'" data-k="'+k[0]+'" value="'+(SET[g][k[0]]||DEF[k[0]])+'"> <button type="button" class="chip" data-g="'+g+'" data-k="'+k[0]+'" title="По умолчанию">↺</button></span></div>'}).join("")}
 function pvSend(){var w=el("pv").contentWindow;if(w)w.postMessage({hrSettings:SET.widget},"*")}
-function pvUpdate(){var f=el("pv"),w=+el("s_pw").value||560,h=+el("s_ph").value||700,b=el("pvw"),z=innerWidth>=700?1.25:1,k=Math.min(1,b.clientWidth/w,innerHeight/z*.36/h);f.style.width=w+"px";f.style.height=h+"px";f.style.transform="scale("+k+")";f.style.left=Math.max(0,Math.round((b.clientWidth-w*k)/2))+"px";b.style.height=Math.round(h*k)+"px";pvSend()}
+function pvUpdate(){var f=el("pv"),w=+el("s_pw").value||560,h=+el("s_ph").value||700,b=el("pvw"),z=innerWidth>=700?1.25:1,k=Math.min(1,b.clientWidth/w,innerHeight/z*.4/h);f.style.width=w+"px";f.style.height=h+"px";f.style.transform="scale("+k+")";f.style.left=Math.max(0,Math.round((b.clientWidth-w*k)/2))+"px";b.style.height=Math.round(h*k)+"px";pvSend()}
 function chg(g){if(g=="site")applySite(SET.site);else pvSend()}
 el("cfg").onclick=function(){SET0=JSON.stringify(SET);crow(el("s_wc"),"widget");crow(el("s_sc"),"site");el("s_w").value=(SET.widget.width<=100&&SET.widget.width)||100;el("ov2").hidden=false;el("pv").onload=pvSend;el("pv").src="widget.html?t="+Date.now();pvUpdate()};
 el("ov2").addEventListener("input",function(e){var t=e.target;if(t.type=="color"){SET[t.dataset.g][t.dataset.k]=t.value;chg(t.dataset.g)}else if(t.id=="s_w"){SET.widget.width=+t.value||undefined;pvSend()}else if(t.id=="s_pw"||t.id=="s_ph")pvUpdate()});
@@ -251,6 +253,8 @@ el("ov2").addEventListener("click",function(e){var b=e.target.closest("button[da
 el("s_reset").onclick=function(){SET={site:{},widget:{}};crow(el("s_wc"),"widget");crow(el("s_sc"),"site");el("s_w").value=100;applySite({});pvSend()};
 el("s_cancel").onclick=function(){SET=JSON.parse(SET0);applySite(SET.site);el("ov2").hidden=true};
 el("s_save").onclick=async function(){toast("Сохраняю настройки…");try{var sha;try{sha=(await gh("GET","contents/settings.json?ref=main")).sha}catch(e){if(e.message!="Not Found")throw e}var b={message:"Настройки с сайта",content:b64(JSON.stringify(SET)),branch:"main"};if(sha)b.sha=sha;await gh("PUT","contents/settings.json",b);toast("Настройки сохранены ✓ Виджет обновится примерно через минуту",4000);el("ov2").hidden=true}catch(e){toast("Не сохранилось: "+e.message,9000)}};
+document.querySelectorAll(".dl input").forEach(function(i){i.setAttribute("autocomplete","off")});
+addEventListener("scroll",function(){el("up").hidden=scrollY<500},{passive:true});el("up").onclick=function(){scrollTo({top:0,behavior:"smooth"})};
 function pub(){return fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})}
 (admin?fetch("https://api.github.com/repos/"+REPO+"/contents/data.json?ref=main",{cache:"no-store",headers:{Authorization:"Bearer "+TOKEN,Accept:"application/vnd.github.raw+json"}}).then(function(r){if(!r.ok)throw 0;return r.json()}).catch(pub):pub()).then(function(d){init(d,true)}).catch(function(){init(DEMO,false)});
 </script>
