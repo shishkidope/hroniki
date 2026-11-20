@@ -20,4 +20,10 @@ jobs:
           git config user.name "ratings-bot"
           git config user.email "bot@users.noreply.github.com"
           git add ratings.json
-          git diff --cached --quiet || (git commit -m "Оценки агрегаторов" && git push)
+          git diff --cached --quiet && exit 0
+          git commit -m "Оценки агрегаторов"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            sleep 5
+          done
+          exit 1
