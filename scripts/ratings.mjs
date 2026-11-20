@@ -43,10 +43,20 @@ async function steam(it) {
     if (!b) return { id: null, u: Date.now() };
     id = b.id;
   }
-  const s = (await getJson(`https://store.steampowered.com/appreviews/${id}?json=1&language=all&purchase_type=all&num_per_page=0`)).query_summary || {};
-  const n = (s.total_positive || 0) + (s.total_negative || 0);
-  if (!n) return { id, pct: null, n: 0, u: Date.now() };
-  return { id, pct: Math.round(100 * s.total_positive / n), n, d: s.review_score_desc || "", u: Date.now() };
+  const v = await reviews(id);
+  return { id, pct: v.pct, n: v.n, d: v.d, u: Date.now() };
+}
+async function reviews(id) {
+  try {
+    const s = (await getJson(`https://store.steampowered.com/appreviews/${id}?json=1&language=all&purchase_type=all&num_per_page=0`)).query_summary || {};
+    const n = (s.total_positive || 0) + (s.total_negative || 0);
+    return { pct: n ? Math.round(100 * s.total_positive / n) : null, n, d: s.review_score_desc || "" };
+  } catch (e) {
+    if (!/не JSON/.test(e.message)) throw e;
+    const j = await getJson("https://steamspy.com/api.php?request=appdetails&appid=" + id);   // запасной источник
+    const n = (j.positive || 0) + (j.negative || 0);
+    return { pct: n ? Math.round(100 * j.positive / n) : null, n, d: "" };
+  }
 }
 export function pickKp(title, docs) {
   const y = +((String(title).match(/\((?:[^)]*?)(\d{4})/) || [])[1] || 0), t = norm(title);
@@ -80,7 +90,7 @@ async function run(list, store, fn, limit, gap) {
   console.log(fn.name, "найдено:", ok, "не найдено:", miss);
 }
 if (process.argv[1] && process.argv[1].endsWith("ratings.mjs")) {
-  console.log("ratings.mjs v3");
+  console.log("ratings.mjs v4");
   await run(data.games || [], R.steam, steam, STEAM_LIMIT, 1200);
   save();
   if (KP) await run([...(data.movies || []), ...(data.anime || [])], R.kp, kp, KP_LIMIT, 400);
