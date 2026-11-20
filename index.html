@@ -216,7 +216,7 @@ function readFields(x){x.t=el("e_t").value;x.ev=clean(el("e_ev").innerHTML);x.n=
 feed.addEventListener("click",function(e){var b=e.target.closest(".edit");if(b)openDlg(find(b.dataset.id))});
 el("add").onclick=function(){openDlg(null)};
 el("e_c").onclick=el("n_c").onclick=closeDlg;
-el("ov").addEventListener("click",function(e){if(e.target==el("ov"))closeDlg()});
+var dn=null;el("ov").addEventListener("mousedown",function(e){dn=e.target});el("ov").addEventListener("touchstart",function(e){dn=e.target},{passive:true});el("ov").addEventListener("click",function(e){if(e.target==el("ov")&&dn==el("ov"))closeDlg();dn=null});
 el("e_s").onclick=function(){if(!editing)return;readFields(editing);closeDlg();render();persist()};
 el("e_u").onclick=function(){if(!editing)return;readFields(editing);if(editing.ds.indexOf(today())<0){editing.ds.push(today());sync(editing)}editing.ts=nextTs();closeDlg();render();persist()};
 el("n_s").onclick=function(){var x={id:++ID,k:el("e_k").value,c:PAL[Math.floor(Math.random()*PAL.length)]};x.ts=nextTs();readFields(x);if(!x.ds.length){x.ds=[today()];sync(x)}if(!x.t.trim()){el("e_t").focus();return}DATA[x.k].push(x);closeDlg();render();persist()};
