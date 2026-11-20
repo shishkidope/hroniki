@@ -7,8 +7,9 @@ const STALE = 45 * 864e5, MISS_RETRY = 3 * 864e5;
 const data = JSON.parse(fs.readFileSync("data.json", "utf8"));
 let R = {}; try { R = JSON.parse(fs.readFileSync("ratings.json", "utf8")); } catch {}
 R.steam ||= {}; R.kp ||= {};
-async function getJson(url, opts) {
-  const r = await fetch(url, opts);
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+async function getJson(url, opts = {}) {
+  const r = await fetch(url, { ...opts, headers: { "User-Agent": UA, "Accept": "application/json", "Accept-Language": "en-US,en;q=0.9", ...(opts.headers || {}) } });
   const t = await r.text();
   if (!r.ok) throw new Error("HTTP " + r.status + " " + url.split("?")[0] + " " + t.slice(0, 120));
   try { return JSON.parse(t); } catch { throw new Error("ответ не JSON: " + t.slice(0, 100)); }
@@ -29,8 +30,16 @@ export function pickSteam(title, items) {
 async function steam(it) {
   let id = typeof it.xid === "number" ? it.xid : null;
   if (!id) {
-    const j = await getJson("https://store.steampowered.com/api/storesearch/?l=english&cc=us&term=" + encodeURIComponent(norm(it.t)));
-    const b = pickSteam(it.t, j.items || []);
+    const term = encodeURIComponent(norm(it.t));
+    let items;
+    try { items = (await getJson("https://store.steampowered.com/api/storesearch/?l=english&cc=us&term=" + term)).items || []; }
+    catch (e) {
+      if (!/не JSON/.test(e.message)) throw e;
+      const h = await (await fetch("https://store.steampowered.com/search/suggest?f=games&cc=US&l=english&term=" + term, { headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" } })).text();
+      items = [...h.matchAll(/data-ds-appid="(\d+)"[\s\S]*?<div class="match_name">([^<]*)<\/div>/g)].map(m => ({ id: +m[1], name: m[2].replace(/&amp;/g, "&").replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"') }));
+      if (!items.length && !/match_name|search_suggest/.test(h)) throw new Error("Steam вернул не то: " + h.slice(0, 100));
+    }
+    const b = pickSteam(it.t, items);
     if (!b) return { id: null, u: Date.now() };
     id = b.id;
   }
