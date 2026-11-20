@@ -18,7 +18,7 @@ async function getJson(url, opts = {}) {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const norm = s => String(s).toLowerCase().replace(/\(.*?\)/g, " ").split(" + ")[0]
   .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
-const due = e => !e || (e.id ? Date.now() - e.u > STALE : Date.now() - e.u > MISS_RETRY);
+const due = (e, it) => !e || (typeof it.xid === "number" ? e.x !== it.xid : !!e.x) || (e.id ? Date.now() - e.u > STALE : Date.now() - e.u > MISS_RETRY);
 const save = () => fs.writeFileSync("ratings.json", JSON.stringify(R));
 
 const STOP = new Set(["the", "a", "an", "of", "and", "to"]);
@@ -82,11 +82,11 @@ async function kp(it) {
   return { id: doc.id, r: v, u: Date.now() };
 }
 async function run(list, store, fn, limit, gap) {
-  const todo = list.filter(it => it.xid !== "-" && due(store[it.t])).slice(0, limit);
+  const todo = list.filter(it => it.xid !== "-" && due(store[it.t], it)).slice(0, limit);
   console.log(fn.name, "к обработке:", todo.length);
   let ok = 0, miss = 0;
   for (const it of todo) {
-    try { store[it.t] = await fn(it); }
+    try { store[it.t] = await fn(it); if (typeof it.xid === "number") store[it.t].x = it.xid; }
     catch (e) { console.log(fn.name, "остановка на «" + it.t + "»:", e.message); break; }
     if (store[it.t].id) ok++; else miss++;
     if (ok + miss <= 8) console.log("  ", it.t, "→", JSON.stringify(store[it.t]));
@@ -96,7 +96,7 @@ async function run(list, store, fn, limit, gap) {
   console.log(fn.name, "найдено:", ok, "не найдено:", miss);
 }
 if (process.argv[1] && process.argv[1].endsWith("ratings.mjs")) {
-  console.log("ratings.mjs v5");
+  console.log("ratings.mjs v6");
   await run(data.games || [], R.steam, steam, STEAM_LIMIT, 1200);
   save();
   const lines = [];
