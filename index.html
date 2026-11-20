@@ -57,7 +57,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.e
 .none{color:var(--muted);font-size:14px;flex:none}
 .note{margin-top:10px;font-size:15px;border-left:3px solid var(--accent);padding-left:10px;white-space:pre-line}
 .note a{color:var(--accent);word-break:break-all}
-.rs{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}.rs .ext{display:flex}
+.rs{display:flex;flex-direction:row;align-items:flex-start;gap:14px;flex:none}.rs .ext{display:flex;margin-top:-2px}@media (max-width:520px){.rs{flex-direction:column-reverse;align-items:flex-end;gap:6px}.rs .ext{margin-top:0}}
 a.ch{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;overflow:hidden;text-decoration:none;font-size:12px;line-height:1;color:var(--text);background:rgba(127,127,127,.08)}
 a.ch:hover{border-color:var(--accent)}
 a.ch i{display:flex;align-items:center;padding:5px 6px;background:rgba(127,127,127,.18)}
@@ -160,7 +160,7 @@ function card(x){
 var rate=x.drop?'<span class="drop">дроп</span>':x.r==null?'<span class="none">без оценки</span>':'<span class="rate" style="--rc:var(--'+(x.r>=8?'good':x.r>=5?'ok':'bad')+')">'+x.r+'<small>/10</small></span>';
 var F=fmt;var d=x.ds.map(F).join('<br>');
 var box='<div class="cv" style="--c1:'+x.c[0]+';--c2:'+x.c[1]+'"><div class="box"><div class="b"><div class="f fr'+(x.i?' im':'')+'">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f sp"></div><div class="f bk">'+(x.i?'<img loading="lazy" src="'+x.i.replace(/"/g,"%22")+'" alt="">':'')+'</div><div class="f rt"></div></div></div></div>';
-return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'" target="_blank" rel="noopener">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div><div class="rs">'+rate+chip(x)+'</div></div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+fc(x.ev||'',dk())+'</div>'+(x.n?'<div class="note">'+fc(x.n,dk())+'</div>':'')+'</div>':'')+'</div></article>'}
+return '<article class="card">'+(admin?'<button class="edit" data-id="'+x.id+'" aria-label="Редактировать">\u270e</button>':'')+'<div class="cl">'+box+(x.k=="games"&&x.pl?'<a href="'+x.pl+'" target="_blank" rel="noopener">Плейлист</a>':'')+'</div><div><div class="top"><div><div class="date">'+d+'</div><div class="title">'+x.t+'</div></div><div class="rs">'+chip(x)+rate+'</div></div>'+((x.ev||x.n)?'<div class="row">'+'<div class="event">'+fc(x.ev||'',dk())+'</div>'+(x.n?'<div class="note">'+fc(x.n,dk())+'</div>':'')+'</div>':'')+'</div></article>'}
 function render(){
 var nav=el("nav");var nb=function(t){return '<button role="tab" aria-selected="'+(t[0]==tab)+'" data-t="'+t[0]+'">'+t[1]+'</button>'};nav.innerHTML='<div class="n1">'+nb(TABS[0])+'</div><div class="n2">'+TABS.slice(1).map(nb).join("")+'</div>';
 nav.querySelectorAll("button").forEach(function(b){b.onclick=function(){location.hash=b.dataset.t}});
