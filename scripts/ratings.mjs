@@ -3,10 +3,16 @@ import fs from "node:fs";
 const KP = process.env.KP_TOKEN || "";
 const KP_LIMIT = +(process.env.KP_LIMIT || 190);   // запросов к Кинопоиску за один запуск
 const STEAM_LIMIT = +(process.env.STEAM_LIMIT || 700);
-const STALE = 45 * 864e5, MISS_RETRY = 90 * 864e5;
+const STALE = 45 * 864e5, MISS_RETRY = 3 * 864e5;
 const data = JSON.parse(fs.readFileSync("data.json", "utf8"));
 let R = {}; try { R = JSON.parse(fs.readFileSync("ratings.json", "utf8")); } catch {}
 R.steam ||= {}; R.kp ||= {};
+async function getJson(url, opts) {
+  const r = await fetch(url, opts);
+  const t = await r.text();
+  if (!r.ok) throw new Error("HTTP " + r.status + " " + url.split("?")[0] + " " + t.slice(0, 120));
+  try { return JSON.parse(t); } catch { throw new Error("ответ не JSON: " + t.slice(0, 100)); }
+}
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const norm = s => String(s).toLowerCase().replace(/\(.*?\)/g, " ").split(" + ")[0]
   .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
@@ -23,16 +29,12 @@ export function pickSteam(title, items) {
 async function steam(it) {
   let id = typeof it.xid === "number" ? it.xid : null;
   if (!id) {
-    const r = await fetch("https://store.steampowered.com/api/storesearch/?l=english&cc=us&term=" + encodeURIComponent(norm(it.t)));
-    if (r.status === 429) throw new Error("limit");
-    const j = await r.json();
+    const j = await getJson("https://store.steampowered.com/api/storesearch/?l=english&cc=us&term=" + encodeURIComponent(norm(it.t)));
     const b = pickSteam(it.t, j.items || []);
     if (!b) return { id: null, u: Date.now() };
     id = b.id;
   }
-  const r = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=all&purchase_type=all&num_per_page=0`);
-  if (r.status === 429) throw new Error("limit");
-  const s = (await r.json()).query_summary || {};
+  const s = (await getJson(`https://store.steampowered.com/appreviews/${id}?json=1&language=all&purchase_type=all&num_per_page=0`)).query_summary || {};
   const n = (s.total_positive || 0) + (s.total_negative || 0);
   if (!n) return { id, pct: null, n: 0, u: Date.now() };
   return { id, pct: Math.round(100 * s.total_positive / n), n, d: s.review_score_desc || "", u: Date.now() };
@@ -46,13 +48,9 @@ export function pickKp(title, docs) {
 async function kp(it) {
   let doc;
   if (typeof it.xid === "number") {
-    const r = await fetch("https://api.kinopoisk.dev/v1.4/movie/" + it.xid, { headers: { "X-API-KEY": KP } });
-    if ([401, 403, 429].includes(r.status)) throw new Error("limit");
-    doc = await r.json();
+    doc = await getJson("https://api.kinopoisk.dev/v1.4/movie/" + it.xid, { headers: { "X-API-KEY": KP } });
   } else {
-    const r = await fetch("https://api.kinopoisk.dev/v1.4/movie/search?page=1&limit=8&query=" + encodeURIComponent(norm(it.t)), { headers: { "X-API-KEY": KP } });
-    if ([401, 403, 429].includes(r.status)) throw new Error("limit");
-    doc = pickKp(it.t, (await r.json()).docs || []);
+    doc = pickKp(it.t, ((await getJson("https://api.kinopoisk.dev/v1.4/movie/search?page=1&limit=8&query=" + encodeURIComponent(norm(it.t)), { headers: { "X-API-KEY": KP } })).docs) || []);
   }
   if (!doc || !doc.id) return { id: null, u: Date.now() };
   const v = doc.rating && doc.rating.kp ? Math.round(doc.rating.kp * 10) / 10 : null;
@@ -60,13 +58,17 @@ async function kp(it) {
 }
 async function run(list, store, fn, limit, gap) {
   const todo = list.filter(it => it.xid !== "-" && due(store[it.t])).slice(0, limit);
-  console.log("к обработке:", todo.length);
+  console.log(fn.name, "к обработке:", todo.length);
+  let ok = 0, miss = 0;
   for (const it of todo) {
     try { store[it.t] = await fn(it); }
-    catch (e) { console.log("остановка:", e.message); break; }
+    catch (e) { console.log(fn.name, "остановка на «" + it.t + "»:", e.message); break; }
+    if (store[it.t].id) ok++; else miss++;
+    if (ok + miss <= 8) console.log("  ", it.t, "→", JSON.stringify(store[it.t]));
     await sleep(gap);
     if (Math.random() < 0.05) save();
   }
+  console.log(fn.name, "найдено:", ok, "не найдено:", miss);
 }
 if (process.argv[1] && process.argv[1].endsWith("ratings.mjs")) {
   await run(data.games || [], R.steam, steam, STEAM_LIMIT, 1200);
