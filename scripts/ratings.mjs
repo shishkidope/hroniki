@@ -7,6 +7,7 @@ const STALE = 45 * 864e5, MISS_RETRY = 3 * 864e5;
 const data = JSON.parse(fs.readFileSync("data.json", "utf8"));
 let R = {}; try { R = JSON.parse(fs.readFileSync("ratings.json", "utf8")); } catch {}
 R.steam ||= {}; R.kp ||= {};
+if (R.v !== 2) { for (const k of Object.keys(R.steam)) if (!R.steam[k].id) delete R.steam[k]; R.v = 2; }
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 async function getJson(url, opts = {}) {
   const r = await fetch(url, { ...opts, headers: { "User-Agent": UA, "Accept": "application/json", "Accept-Language": "en-US,en;q=0.9", ...(opts.headers || {}) } });
@@ -20,12 +21,17 @@ export const norm = s => String(s).toLowerCase().replace(/\(.*?\)/g, " ").split(
 const due = e => !e || (e.id ? Date.now() - e.u > STALE : Date.now() - e.u > MISS_RETRY);
 const save = () => fs.writeFileSync("ratings.json", JSON.stringify(R));
 
+const STOP = new Set(["the", "a", "an", "of", "and", "to"]);
+const ED = new Set(["edition", "remastered", "remaster", "definitive", "deluxe", "goty", "game", "year", "complete", "enhanced", "director", "s", "cut", "collection", "ultimate", "anniversary", "prepare", "die", "hd", "redux", "reloaded", "reforged", "special", "legendary", "gold", "digital", "version", "bundle"]);
+const core = s => norm(s).split(" ").filter(w => w && !STOP.has(w) && !ED.has(w));
+const key = a => [...new Set(a)].sort().join(" ");
 export function pickSteam(title, items) {
   const t = norm(title);
-  let best = items.find(i => norm(i.name) === t);
-  if (!best) best = items.find(i => { const n = norm(i.name); const [a, b] = n.length < t.length ? [n, t] : [t, n];
-    return b.startsWith(a) && a.length / b.length > 0.7 && !/^(\d+|[ivx]+)( |$)/.test(b.slice(a.length).trim()); });
-  return best || null;
+  const exact = items.find(i => norm(i.name) === t);
+  if (exact) return exact;
+  const T = core(title);
+  if (!T.length) return null;
+  return items.find(i => { const C = core(i.name); return C.length && key(C) === key(T); }) || null;
 }
 async function steam(it) {
   let id = typeof it.xid === "number" ? it.xid : null;
@@ -40,7 +46,7 @@ async function steam(it) {
       if (!items.length && !/match_name|search_suggest/.test(h)) throw new Error("Steam вернул не то: " + h.slice(0, 100));
     }
     const b = pickSteam(it.t, items);
-    if (!b) return { id: null, u: Date.now() };
+    if (!b) return { id: null, c: items.slice(0, 3).map(i => [i.id, i.name]), u: Date.now() };
     id = b.id;
   }
   const v = await reviews(id);
@@ -90,9 +96,12 @@ async function run(list, store, fn, limit, gap) {
   console.log(fn.name, "найдено:", ok, "не найдено:", miss);
 }
 if (process.argv[1] && process.argv[1].endsWith("ratings.mjs")) {
-  console.log("ratings.mjs v4");
+  console.log("ratings.mjs v5");
   await run(data.games || [], R.steam, steam, STEAM_LIMIT, 1200);
   save();
+  const lines = [];
+  for (const [t, e] of Object.entries(R.steam)) if (!e.id && e.c && e.c.length) lines.push("- **" + t + "** → " + e.c.map(([id, n]) => `[${n}](https://store.steampowered.com/app/${id}/)`).join(" · "));
+  fs.writeFileSync("unmatched.md", "# Игры без оценки Steam\n\nЕсли среди вариантов есть нужная, скопируй ссылку и вставь в поле «Оценка агрегатора» этой записи на сайте.\n\n" + lines.join("\n") + "\n");
   if (KP) await run([...(data.movies || []), ...(data.anime || [])], R.kp, kp, KP_LIMIT, 400);
   else console.log("KP_TOKEN не задан, Кинопоиск пропущен");
   save();
