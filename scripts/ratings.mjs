@@ -12,7 +12,7 @@ async function getJson(url, opts = {}) {
   const r = await fetch(url, { ...opts, headers: { "User-Agent": UA, "Accept": "application/json", "Accept-Language": "en-US,en;q=0.9", ...(opts.headers || {}) } });
   const t = await r.text();
   if (!r.ok) throw new Error("HTTP " + r.status + " " + url.split("?")[0] + " " + t.slice(0, 120));
-  try { return JSON.parse(t); } catch { throw new Error("ответ не JSON: " + t.slice(0, 100)); }
+  try { return JSON.parse(t); } catch { throw new Error("ответ не JSON (" + r.status + ") " + url.split("?")[0] + " " + t.slice(0, 80).replace(/\s+/g, " ")); }
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const norm = s => String(s).toLowerCase().replace(/\(.*?\)/g, " ").split(" + ")[0]
@@ -80,6 +80,7 @@ async function run(list, store, fn, limit, gap) {
   console.log(fn.name, "найдено:", ok, "не найдено:", miss);
 }
 if (process.argv[1] && process.argv[1].endsWith("ratings.mjs")) {
+  console.log("ratings.mjs v3");
   await run(data.games || [], R.steam, steam, STEAM_LIMIT, 1200);
   save();
   if (KP) await run([...(data.movies || []), ...(data.anime || [])], R.kp, kp, KP_LIMIT, 400);
